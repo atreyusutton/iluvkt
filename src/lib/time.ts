@@ -27,6 +27,7 @@ export function daysBetween(fromKey: string, toKey: string): number {
 }
 
 export function formatMinutes(totalMinutes: number): string {
+  if (totalMinutes > 0 && totalMinutes < 1) return `${Math.round(totalMinutes * 60)} sec`;
   const minutes = Math.round(totalMinutes);
   if (minutes < 60) return `${minutes} min`;
   const hours = Math.floor(minutes / 60);

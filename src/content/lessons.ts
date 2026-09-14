@@ -271,12 +271,12 @@ export const MODULES: LessonModule[] = [
   },
 ];
 
-export const ALL_LESSONS = MODULES.flatMap((module) => module.lessons);
+export const ALL_LESSONS = MODULES.flatMap((lessonModule) => lessonModule.lessons);
 
 export function findLesson(slug: string) {
-  for (const module of MODULES) {
-    const lesson = module.lessons.find((item) => item.slug === slug);
-    if (lesson) return { module, lesson };
+  for (const lessonModule of MODULES) {
+    const lesson = lessonModule.lessons.find((item) => item.slug === slug);
+    if (lesson) return { module: lessonModule, lesson };
   }
   return undefined;
 }
