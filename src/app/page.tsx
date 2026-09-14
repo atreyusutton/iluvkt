@@ -84,7 +84,7 @@ export default async function HomePage() {
 
         <Card className="lg:col-span-2">
           <div className="grid gap-6 sm:grid-cols-3">
-            <Stat label="Total on iluvkt" value={formatMinutes(stats.totalMinutes)} hint={`${Math.round(stats.totalMinutes).toLocaleString()} minutes`} />
+            <Stat label="Total on iluvkt" value={`${Math.round(stats.totalMinutes).toLocaleString()} min`} hint={formatMinutes(stats.totalMinutes)} />
             <Stat label="Sessions" value={stats.totalSessions} />
             <Stat
               label="Average session"
