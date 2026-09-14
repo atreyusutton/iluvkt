@@ -42,30 +42,39 @@ export const DONT_THINK_TWICE: SongTemplate = {
   beatsPerBar: 4,
   strummingPattern: "Fingerpicked (Travis). Beginner fallback: D  D U  U D U",
   notes:
-    "Capo on the 4th fret; all chord names are the shapes you finger. The progression here is a common arrangement — compare it with your tutorial and edit anything that differs. Start the play-along around 60 BPM and nudge it up a few BPM at a time once a section feels clean.",
+    "Capo on the 4th fret; all chord names are the shapes you finger. The progression follows the album-version tab; bar lengths are a best guess — compare with the tutorial and adjust in Sections. Start the play-along around 60 BPM and nudge it up a few BPM at a time once a section feels clean.",
   pickingPattern: TRAVIS_PATTERN,
   tutorials: [{ youtubeId: "NNVYwE-KGkQ", title: "Josh Turner lesson" }],
-  chordSheet: `> Chords only for now. Paste the lyrics (official ones are on bobdylan.com) and put each chord in [brackets] right before the syllable it lands on, e.g. [C]your lyric [G]here.
-> Capo 4 — chord names are the shapes you finger.
+  chordSheet: `> Chords only for now. Click "Edit / paste lyrics" and paste a full chord tab — chord lines above lyric lines and [Verse 1] headings both work.
+> Capo 4 — chord names are the shapes you finger. (Am Am7/G F) = three chords squeezed into the time of two.
 
-# Intro
-[C]    [G]    [Am]    [F]
-[C]    [G]    [C]    [G]
+[Intro]
+C    G
+(Am  Am7/G  F)
+C    G    C
 
-# Verse
-[C]    [G]    [Am]
-[F]    [C]    [G]
-[C]    [G]    [Am]
-[D7]    [G]    [G7]
-[C]    [C7]    [F]    [D7]
-[C]    [G]    [Am]    [F]
-[C]    [G]    [C]    [G]
+[Verse]
+C    G    Am
+F    C    G
+C    G    Am
+D7    G    G7
+C    C7
+F    D7
+C    G    Am    F
+C    G    C
 
-# Instrumental (between verses)
-[C]    [G]    [Am]    [F]
-[C]    [G]    [C]    [G]`,
+[Interlude]
+C    G    Am    F    C
+
+[Outro]
+C    G    Am    F    C
+C    G    Am    D7    G    G7
+C    C7    F    D7
+C    G
+(C  G  F)
+C    G    C`,
   sections: [
-    { name: "Intro", bars: bars("C", "G", "Am", "F", "C", "G", "C", "G") },
+    { name: "Intro", bars: [...bars("C", "G"), { chord: "Am", beats: 3 }, { chord: "Am7/G", beats: 1 }, { chord: "F", beats: 4 }, ...bars("C", "G", "C")] },
     {
       name: "Verse",
       bars: bars(
@@ -73,11 +82,23 @@ export const DONT_THINK_TWICE: SongTemplate = {
         "F", "F", "C", "G",
         "C", "G", "Am", "Am",
         "D7", "D7", "G", "G7",
-        "C", "C7", "F", "D7",
+        "C", "C", "C7", "C7",
+        "F", "F", "D7", "D7",
         "C", "G", "Am", "F",
-        "C", "G", "C", "G",
+        "C", "G", "C", "C",
       ),
     },
-    { name: "Instrumental", bars: bars("C", "G", "Am", "F", "C", "G", "C", "G") },
+    { name: "Interlude", bars: bars("C", "G", "Am", "F", "C") },
+    {
+      name: "Outro",
+      bars: [
+        ...bars("C", "G", "Am", "F", "C"),
+        ...bars("C", "G", "Am", "D7", "G", "G7"),
+        ...bars("C", "C7", "F", "D7"),
+        ...bars("C", "G"),
+        { chord: "C", beats: 3 }, { chord: "G", beats: 3 }, { chord: "F", beats: 2 },
+        ...bars("C", "G", "C"),
+      ],
+    },
   ],
 };

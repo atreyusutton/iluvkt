@@ -39,6 +39,7 @@ export const CHORDS: ChordShape[] = [
   { name: "Fmaj7", frets: [-1, -1, 3, 2, 1, 0], fingers: [0, 0, 3, 2, 1, 0], root: 4, alt: 3, category: "other", tip: "The beginner-friendly stand-in for F." },
   { name: "Am7", frets: [-1, 0, 2, 0, 1, 0], fingers: [0, 0, 2, 0, 1, 0], root: 5, alt: 4, category: "other" },
   { name: "Em7", frets: [0, 2, 2, 0, 3, 0], fingers: [0, 1, 2, 0, 3, 0], root: 6, alt: 4, category: "other" },
+  { name: "Am7/G", frets: [3, -1, 2, 0, 1, 0], fingers: [3, 0, 2, 0, 1, 0], root: 6, alt: 4, category: "other", tip: "A passing chord: keep Am7's shape and reach your ring finger to the low E, 3rd fret. Skip the A string." },
   { name: "Dm7", frets: [-1, -1, 0, 2, 1, 1], fingers: [0, 0, 0, 2, 1, 1], root: 4, alt: 5, category: "other" },
   { name: "Cadd9", frets: [-1, 3, 2, 0, 3, 3], fingers: [0, 2, 1, 0, 3, 4], root: 5, alt: 4, category: "other" },
   { name: "Dsus2", frets: [-1, -1, 0, 2, 3, 0], fingers: [0, 0, 0, 1, 2, 0], root: 4, alt: 5, category: "suspended" },
