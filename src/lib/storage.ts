@@ -7,7 +7,9 @@ import { pipeline } from "node:stream/promises";
 import { del, get } from "@vercel/blob";
 import type { Recording } from "@/db/schema";
 
-const LOCAL_DIR = path.join(process.cwd(), ".data", "recordings");
+/** Local takes live in <project>/recordings so they're easy to find, open and back up. */
+export const LOCAL_RECORDINGS_DIR = path.join(process.cwd(), "recordings");
+const LOCAL_DIR = LOCAL_RECORDINGS_DIR;
 
 export function extensionFor(mimeType: string): string {
   if (mimeType.startsWith("video/mp4")) return "mp4";
@@ -18,13 +20,23 @@ export function extensionFor(mimeType: string): string {
 }
 
 /** Streams an upload straight to disk so long video takes never sit in memory. */
+/** e.g. "2026-09-14 19-05 Verse at 70 BPM (video).webm" — readable when browsing the folder. */
+export function localRecordingFilename(mimeType: string, label: string, createdAt = new Date()): string {
+  const local = new Date(createdAt.getTime() - createdAt.getTimezoneOffset() * 60_000).toISOString();
+  const stamp = `${local.slice(0, 10)} ${local.slice(11, 13)}-${local.slice(14, 16)}`;
+  const name = label.replace(/[^\w\s-]/g, "").replace(/\s+/g, " ").trim().slice(0, 60);
+  const kind = mimeType.startsWith("video/") ? " (video)" : "";
+  const unique = crypto.randomUUID().slice(0, 4);
+  return `${stamp}${name ? ` ${name}` : ""}${kind} ${unique}.${extensionFor(mimeType)}`;
+}
+
 export async function saveLocalRecordingStream(
   body: ReadableStream<Uint8Array>,
   mimeType: string,
+  label = "",
 ): Promise<{ storage: "local"; key: string; sizeBytes: number }> {
   await mkdir(LOCAL_DIR, { recursive: true });
-  const stamp = new Date().toISOString().replace(/[:.]/g, "-");
-  const filename = `${stamp}-${crypto.randomUUID().slice(0, 8)}.${extensionFor(mimeType)}`;
+  const filename = localRecordingFilename(mimeType, label);
   const filePath = path.join(LOCAL_DIR, filename);
   try {
     await pipeline(Readable.fromWeb(body as import("node:stream/web").ReadableStream), createWriteStream(filePath));

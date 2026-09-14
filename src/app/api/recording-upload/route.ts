@@ -26,8 +26,9 @@ export async function POST(request: Request) {
   }
 
   try {
-    const saved = await saveLocalRecordingStream(request.body, mimeType);
-    const recording = await insertRecording({ ...saved, mimeType }, readMeta(new URL(request.url).searchParams));
+    const meta = readMeta(new URL(request.url).searchParams);
+    const saved = await saveLocalRecordingStream(request.body, mimeType, meta.label);
+    const recording = await insertRecording({ ...saved, mimeType }, meta);
     return NextResponse.json({ recording });
   } catch (error) {
     console.error("Saving local recording failed:", error);

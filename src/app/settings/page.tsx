@@ -4,6 +4,7 @@ import { settings } from "@/db/schema";
 import { Card, CardTitle, PageHeader, Pill } from "@/components/ui";
 import { getServiceStatus } from "@/lib/services";
 import { getTimezone } from "@/lib/timezone";
+import { DemoData } from "./demo-data";
 import { SettingsForm } from "./settings-form";
 
 export const metadata = { title: "Settings" };
@@ -29,14 +30,10 @@ export default async function SettingsPage() {
     },
     {
       name: "Recordings",
-      ok: services.recordings === "blob",
-      live: "Vercel Blob (private)",
-      fallback: "Local disk (.data/recordings)",
-      howTo: (
-        <>
-          Run <code>vercel blob create-store iluvkt-recordings --access private --yes</code>, then <code>vercel env pull</code>.
-        </>
-      ),
+      ok: true,
+      live: services.recordings === "blob" ? "Vercel Blob (private)" : "This project's recordings/ folder",
+      fallback: "",
+      howTo: null,
     },
     {
       name: "AI journal",
@@ -102,6 +99,13 @@ export default async function SettingsPage() {
           </ul>
         </Card>
       </div>
+
+      {process.env.NODE_ENV === "development" && (
+        <Card>
+          <CardTitle>Demo data</CardTitle>
+          <DemoData />
+        </Card>
+      )}
     </div>
   );
 }

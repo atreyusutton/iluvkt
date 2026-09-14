@@ -42,3 +42,7 @@ next-env.d.ts
 
 # local dev data (embedded Postgres + recordings)
 /.data
+
+# practice recordings (saved locally by the app)
+/recordings/*
+!/recordings/.gitkeep
