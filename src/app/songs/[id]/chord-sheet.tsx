@@ -70,30 +70,19 @@ export function ChordSheet({ songId, initial }: { songId: number; initial: strin
         <Button size="sm" onClick={pasteFromClipboard} disabled={pending}>{pending ? "Saving…" : "Paste tab from clipboard"}</Button>
       </div>
       {error && <p className="mb-3 text-sm text-bad">{error}</p>}
-      <div style={{ fontSize }} className="space-y-1 leading-relaxed">
+      <div style={{ fontSize }} className="overflow-x-auto leading-snug">
         {lines.map((line, index) => {
-          if (line.type === "blank") return <div key={index} className="h-3" />;
+          if (line.type === "blank") return <div key={index} className="h-[0.9em]" />;
           if (line.type === "heading")
-            return <h3 key={index} className="pt-4 font-display text-[1.15em] font-semibold text-rose">{line.text}</h3>;
+            return <h3 key={index} className="pb-1 pt-3 font-display text-[1.15em] font-semibold text-rose">{line.text}</h3>;
           if (line.type === "note")
-            return <p key={index} className="rounded-lg bg-surface-2 px-3 py-2 text-[0.8em] text-ink-2">{line.text}</p>;
-          if (line.segments.every((segment) => !segment.text.trim())) {
-            return (
-              <div key={index} className="flex flex-wrap gap-x-6 font-semibold text-accent">
-                {line.segments.map((segment, segmentIndex) => (
-                  <span key={segmentIndex}>{segment.chord}</span>
-                ))}
-              </div>
-            );
-          }
+            return <p key={index} className="my-1 rounded-lg bg-surface-2 px-3 py-2 font-sans text-[0.8em] text-ink-2">{line.text}</p>;
+          if (line.type === "chords")
+            return <div key={index} className="whitespace-pre font-mono font-semibold text-accent">{line.row}</div>;
           return (
-            <div key={index} className="flex flex-wrap items-end">
-              {line.segments.map((segment, segmentIndex) => (
-                <span key={segmentIndex} className="inline-flex flex-col whitespace-pre">
-                  <span className="min-h-[1.3em] pr-2 font-semibold text-accent">{segment.chord ?? ""}</span>
-                  <span>{segment.text || " "}</span>
-                </span>
-              ))}
+            <div key={index} className="mb-1 font-mono">
+              {line.chordRow && <div className="whitespace-pre font-semibold text-accent">{line.chordRow}</div>}
+              <div className="whitespace-pre">{line.textRow}</div>
             </div>
           );
         })}
