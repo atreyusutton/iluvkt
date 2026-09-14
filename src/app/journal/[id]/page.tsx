@@ -7,6 +7,7 @@ import { Card, CardTitle, PageHeader, Pill, Stat } from "@/components/ui";
 import { formatClock, formatDate, formatMinutes } from "@/lib/time";
 import { getTimezone } from "@/lib/timezone";
 import { JournalPending, RetryJournalButton } from "./journal-status";
+import { RecordingPlayer } from "@/components/recording-player";
 
 export const metadata = { title: "Journal entry" };
 
@@ -173,7 +174,7 @@ export default async function JournalEntryPage({ params }: PageProps<"/journal/[
                   </span>
                   <span className="tabular-nums text-ink-3">{formatClock(recording.durationSeconds)}</span>
                 </div>
-                <audio controls preload="none" src={`/api/recordings/${recording.id}/audio`} className="w-full" />
+                <RecordingPlayer id={recording.id} mimeType={recording.mimeType} />
               </li>
             ))}
           </ul>

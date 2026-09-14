@@ -1,9 +1,11 @@
 import type { Metadata, Viewport } from "next";
 import { Fraunces, Geist, Geist_Mono } from "next/font/google";
 import { Nav } from "@/components/nav";
+import { RecordingProvider } from "@/components/recording-provider";
 import { SessionPill } from "@/components/session-pill";
 import { TimezoneSync } from "@/components/timezone-sync";
 import { isPasswordProtected } from "@/lib/auth";
+import { getServiceStatus } from "@/lib/services";
 import { getTimezone } from "@/lib/timezone";
 import "./globals.css";
 
@@ -30,13 +32,15 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable} ${fraunces.variable} antialiased`}>
       <body className="min-h-dvh font-sans">
         <TimezoneSync serverTimezone={timezone} />
-        <div className="flex min-h-dvh">
-          <Nav passwordProtected={isPasswordProtected()} />
-          <main className="min-w-0 flex-1 px-4 pb-28 pt-20 md:px-10 md:pb-12 md:pt-10">
-            <div className="mx-auto max-w-6xl">{children}</div>
-          </main>
-        </div>
-        <SessionPill floating />
+        <RecordingProvider backend={getServiceStatus().recordings}>
+          <div className="flex min-h-dvh">
+            <Nav passwordProtected={isPasswordProtected()} />
+            <main className="min-w-0 flex-1 px-4 pb-28 pt-20 md:px-10 md:pb-12 md:pt-10">
+              <div className="mx-auto max-w-6xl">{children}</div>
+            </main>
+          </div>
+          <SessionPill floating />
+        </RecordingProvider>
       </body>
     </html>
   );

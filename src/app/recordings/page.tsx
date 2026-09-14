@@ -5,6 +5,7 @@ import { recordings, songs } from "@/db/schema";
 import { Card, CardTitle, EmptyState, PageHeader, cn } from "@/components/ui";
 import { dayKey, formatClock, formatDate } from "@/lib/time";
 import { getTimezone } from "@/lib/timezone";
+import { RecordingPlayer } from "@/components/recording-player";
 import { RecordingItem } from "./recording-item";
 
 export const metadata = { title: "Recordings" };
@@ -70,7 +71,7 @@ export default async function RecordingsPage({ searchParams }: PageProps<"/recor
                     {formatDate(recording.createdAt, timeZone, { year: "numeric" })} · {formatClock(recording.durationSeconds)}
                   </span>
                 </div>
-                <audio controls preload="none" src={`/api/recordings/${recording.id}/audio`} className="w-full" />
+                <RecordingPlayer id={recording.id} mimeType={recording.mimeType} />
               </div>
             ))}
           </div>
@@ -105,6 +106,7 @@ export default async function RecordingsPage({ searchParams }: PageProps<"/recor
                       durationSeconds: recording.durationSeconds,
                       sessionId: recording.sessionId,
                       songId: recording.songId,
+                      mimeType: recording.mimeType,
                       time: formatDate(recording.createdAt, timeZone, { weekday: undefined, month: undefined, day: undefined, hour: "numeric", minute: "2-digit" }),
                     }}
                     songTitle={recording.songId ? songTitles.get(recording.songId) ?? null : null}

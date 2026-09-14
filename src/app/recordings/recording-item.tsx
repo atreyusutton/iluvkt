@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState, useTransition } from "react";
 import { deleteRecording, renameRecording, setRecordingStarred } from "@/app/actions/misc";
+import { RecordingPlayer } from "@/components/recording-player";
 import { cn } from "@/components/ui";
 import { formatClock } from "@/lib/time";
 
@@ -14,6 +15,7 @@ type Item = {
   sessionId: number | null;
   songId: number | null;
   time: string;
+  mimeType: string;
 };
 
 export function RecordingItem({ recording, songTitle }: { recording: Item; songTitle: string | null }) {
@@ -67,7 +69,7 @@ export function RecordingItem({ recording, songTitle }: { recording: Item; songT
           />
         ) : (
           <button onClick={() => setEditing(true)} className="font-medium hover:text-accent" title="Rename">
-            {label || "Untitled take"} <span className="text-xs text-ink-3">✎</span>
+            {recording.mimeType.startsWith("video/") ? "🎥 " : ""}{label || "Untitled take"} <span className="text-xs text-ink-3">✎</span>
           </button>
         )}
         <span className="text-sm text-ink-3">
@@ -90,7 +92,7 @@ export function RecordingItem({ recording, songTitle }: { recording: Item; songT
           </button>
         </span>
       </div>
-      <audio controls preload="none" src={`/api/recordings/${recording.id}/audio`} className="w-full" />
+      <RecordingPlayer id={recording.id} mimeType={recording.mimeType} />
       {error && <p className="mt-2 text-sm text-bad">{error}</p>}
     </li>
   );

@@ -329,8 +329,8 @@ export function PracticeRoom({
         <div className="space-y-6">
           <Card>
             <CardTitle>Record</CardTitle>
-            <p className="mb-4 text-sm text-ink-2">Takes are attached to this session so you can hear your progress later.</p>
-            <Recorder sessionId={state.sessionId} songId={draft.songId} />
+            <p className="mb-4 text-sm text-ink-2">Audio or video of yourself playing. Once you hit record it lives in the top bar — go to the song, tuner or anywhere else and it keeps recording until you press Stop.</p>
+            <Recorder songId={draft.songId} />
           </Card>
           <Card>
             <CardTitle>Quick tools</CardTitle>

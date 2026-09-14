@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { asc, desc, eq } from "drizzle-orm";
 import { updateSongDetails } from "@/app/actions/songs";
 import { ChordDiagram } from "@/components/chord-diagram";
+import { RecordingPlayer } from "@/components/recording-player";
 import { TabView } from "@/components/tab-view";
 import { TutorialVideos } from "@/components/tutorial-videos";
 import { Button, Card, CardTitle, PageHeader, Pill } from "@/components/ui";
@@ -170,7 +171,7 @@ export default async function SongPage({ params }: PageProps<"/songs/[id]">) {
               <div className="grid gap-6 lg:grid-cols-2">
                 <Card>
                   <CardTitle>Record a take</CardTitle>
-                  <p className="mb-4 text-sm text-ink-2">If a practice session is running, the take is attached to it.</p>
+                  <p className="mb-4 text-sm text-ink-2">Audio or video. Recording moves to the top bar so you can keep browsing; if a practice session is running, the take is attached to it.</p>
                   <SongRecorder songId={song.id} />
                 </Card>
                 <Card>
@@ -187,7 +188,7 @@ export default async function SongPage({ params }: PageProps<"/songs/[id]">) {
                               {formatDate(recording.createdAt, timeZone)} · {formatClock(recording.durationSeconds)}
                             </span>
                           </div>
-                          <audio controls preload="none" src={`/api/recordings/${recording.id}/audio`} className="w-full" />
+                          <RecordingPlayer id={recording.id} mimeType={recording.mimeType} />
                         </li>
                       ))}
                     </ul>
