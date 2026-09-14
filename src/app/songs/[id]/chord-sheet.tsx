@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import { saveChordSheet } from "@/app/actions/songs";
 import { Button } from "@/components/ui";
-import { parseChordSheet } from "@/lib/chordpro";
+import { cleanPastedTab, parseChordSheet } from "@/lib/chordpro";
 
 export function ChordSheet({ songId, initial }: { songId: number; initial: string }) {
   const [source, setSource] = useState(initial);
@@ -13,16 +13,33 @@ export function ChordSheet({ songId, initial }: { songId: number; initial: strin
   const [pending, startTransition] = useTransition();
   const lines = parseChordSheet(source);
 
-  const save = () => {
+  const save = (next = source) => {
     setError(null);
     startTransition(async () => {
       try {
-        await saveChordSheet(songId, source);
+        await saveChordSheet(songId, next);
+        setSource(next);
         setEditing(false);
       } catch (err) {
         setError(err instanceof Error ? err.message : String(err));
       }
     });
+  };
+
+  const pasteFromClipboard = async () => {
+    setError(null);
+    let text: string;
+    try {
+      text = await navigator.clipboard.readText();
+    } catch (err) {
+      setError(`Couldn't read the clipboard (${err instanceof Error ? err.message : String(err)}). Use "Edit" and paste with ⌘V instead.`);
+      return;
+    }
+    if (!text.trim()) {
+      setError("Your clipboard is empty — copy the tab first.");
+      return;
+    }
+    save(cleanPastedTab(text));
   };
 
   if (editing) {
@@ -35,7 +52,8 @@ export function ChordSheet({ songId, initial }: { songId: number; initial: strin
         </p>
         <textarea value={source} onChange={(event) => setSource(event.target.value)} rows={24} className="field font-mono" spellCheck={false} />
         <div className="flex gap-2">
-          <Button onClick={save} disabled={pending}>{pending ? "Saving…" : "Save sheet"}</Button>
+          <Button onClick={() => save()} disabled={pending}>{pending ? "Saving…" : "Save sheet"}</Button>
+          <Button variant="secondary" onClick={() => setSource((current) => cleanPastedTab(current))} disabled={pending}>Tidy pasted tab</Button>
           <Button variant="ghost" onClick={() => { setSource(initial); setEditing(false); }} disabled={pending}>Cancel</Button>
         </div>
         {error && <p className="text-sm text-bad">{error}</p>}
@@ -48,8 +66,10 @@ export function ChordSheet({ songId, initial }: { songId: number; initial: strin
       <div className="mb-4 flex flex-wrap items-center justify-end gap-2">
         <Button variant="ghost" size="sm" onClick={() => setFontSize((size) => Math.max(12, size - 2))} aria-label="Smaller text">A−</Button>
         <Button variant="ghost" size="sm" onClick={() => setFontSize((size) => Math.min(28, size + 2))} aria-label="Larger text">A+</Button>
-        <Button variant="secondary" size="sm" onClick={() => setEditing(true)}>Edit / paste lyrics</Button>
+        <Button variant="secondary" size="sm" onClick={() => setEditing(true)}>Edit</Button>
+        <Button size="sm" onClick={pasteFromClipboard} disabled={pending}>{pending ? "Saving…" : "Paste tab from clipboard"}</Button>
       </div>
+      {error && <p className="mb-3 text-sm text-bad">{error}</p>}
       <div style={{ fontSize }} className="space-y-1 leading-relaxed">
         {lines.map((line, index) => {
           if (line.type === "blank") return <div key={index} className="h-3" />;

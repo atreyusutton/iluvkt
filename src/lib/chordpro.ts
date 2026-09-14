@@ -101,3 +101,24 @@ export function chordsInSheet(source: string): string[] {
   }
   return [...found];
 }
+
+const TRAILING_JUNK = /^\s*(x|please rate this tab.*|rate this tab.*)\s*$/i;
+
+/**
+ * Tidies a chord tab copied from a tab website: drops the page chrome above the first
+ * [Intro]-style heading (keeping a "Capo" line just above it) and the rating prompt at the bottom.
+ */
+export function cleanPastedTab(text: string): string {
+  const lines = text.replace(/\u00a0/g, " ").split(/\r?\n/).map((line) => line.trimEnd());
+  const heading = lines.findIndex((line) => isSectionHeading(line));
+  let start = heading;
+  for (let index = heading - 1; heading > 0 && index >= Math.max(0, heading - 8); index--) {
+    if (/^\s*capo\b/i.test(lines[index])) {
+      start = index;
+      break;
+    }
+  }
+  const body = start > 0 ? lines.slice(start) : lines;
+  while (body.length && (!body[body.length - 1].trim() || TRAILING_JUNK.test(body[body.length - 1]))) body.pop();
+  return body.join("\n").replace(/\n{3,}/g, "\n\n");
+}

@@ -45,7 +45,7 @@ export const DONT_THINK_TWICE: SongTemplate = {
     "Capo on the 4th fret; all chord names are the shapes you finger. The progression follows the album-version tab; bar lengths are a best guess — compare with the tutorial and adjust in Sections. Start the play-along around 60 BPM and nudge it up a few BPM at a time once a section feels clean.",
   pickingPattern: TRAVIS_PATTERN,
   tutorials: [{ youtubeId: "NNVYwE-KGkQ", title: "Josh Turner lesson" }],
-  chordSheet: `> Chords only for now. Click "Edit / paste lyrics" and paste a full chord tab — chord lines above lyric lines and [Verse 1] headings both work.
+  chordSheet: `> Chords only for now. Copy a full chord tab from any tab site, then click "Paste tab from clipboard" — chord lines above lyric lines and [Verse 1] headings both work.
 > Capo 4 — chord names are the shapes you finger. (Am Am7/G F) = three chords squeezed into the time of two.
 
 [Intro]
