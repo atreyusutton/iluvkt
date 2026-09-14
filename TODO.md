@@ -16,7 +16,7 @@
 - [ ] Neon: accept terms at https://vercel.com/atreyu-suttons-projects/~/integrations/accept-terms/neon?source=cli then `vercel integration add neon`
 - [ ] Password: `vercel env add APP_PASSWORD` then `vercel env pull`
 - [ ] Paste the lyrics into the chord sheet and double-check the progression against your tutorial
-- [ ] Add a YouTube tutorial on the song's Tutorials tab
+- [x] Tutorial video embedded (Josh Turner lesson)
 
 ## Next ideas
 - Deploy to Vercel (`vercel deploy`)

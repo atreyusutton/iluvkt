@@ -11,6 +11,7 @@ export type SongTemplate = {
   strummingPattern: string;
   notes: string;
   sections: { name: string; bars: Bar[] }[];
+  tutorials: { youtubeId: string; title: string }[];
 };
 
 const bars = (...chords: string[]): Bar[] => chords.map((chord) => ({ chord, beats: 4 }));
@@ -43,6 +44,7 @@ export const DONT_THINK_TWICE: SongTemplate = {
   notes:
     "Capo on the 4th fret; all chord names are the shapes you finger. The progression here is a common arrangement — compare it with your tutorial and edit anything that differs. Start the play-along around 60 BPM and nudge it up a few BPM at a time once a section feels clean.",
   pickingPattern: TRAVIS_PATTERN,
+  tutorials: [{ youtubeId: "NNVYwE-KGkQ", title: "Josh Turner lesson" }],
   chordSheet: `> Chords only for now. Paste the lyrics (official ones are on bobdylan.com) and put each chord in [brackets] right before the syllable it lands on, e.g. [C]your lyric [G]here.
 > Capo 4 — chord names are the shapes you finger.
 
