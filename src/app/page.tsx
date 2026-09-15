@@ -5,7 +5,6 @@ import { practiceSessions, settings, songSections, songs } from "@/db/schema";
 import { PracticeHeatmap } from "@/components/practice-heatmap";
 import { ButtonLink, Card, CardTitle, EmptyState, Pill, ProgressBar, ProgressRing, Stat } from "@/components/ui";
 import { WeekChart } from "@/components/week-chart";
-import { getServiceStatus } from "@/lib/services";
 import { getBadges, getPracticeStats } from "@/lib/stats";
 import { daysBetween, formatDate, formatMinutes } from "@/lib/time";
 import { getTimezone } from "@/lib/timezone";
@@ -36,7 +35,6 @@ export default async function HomePage() {
     ? await db.select().from(songSections).where(eq(songSections.songId, firstSong.id)).orderBy(songSections.position)
     : [];
 
-  const services = getServiceStatus();
   const remaining = Math.max(0, stats.goalMinutes - stats.todayMinutes);
   const goalHit = remaining === 0;
   const earned = badges.filter((badge) => badge.earned);
@@ -46,12 +44,6 @@ export default async function HomePage() {
 
   return (
     <div className="space-y-6">
-      {services.database === "local" && (
-        <div className="rounded-xl border border-warn/30 bg-warn-soft px-4 py-2 text-sm text-warn">
-          Local mode — practice data and recordings are saved on this computer. <Link href="/settings" className="underline">See setup</Link>
-        </div>
-      )}
-
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="text-ink-3">{formatDate(new Date(), timeZone, { weekday: "long", month: "long", day: "numeric" })}</p>

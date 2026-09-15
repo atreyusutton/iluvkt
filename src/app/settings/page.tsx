@@ -4,7 +4,6 @@ import { settings } from "@/db/schema";
 import { Card, CardTitle, PageHeader, Pill } from "@/components/ui";
 import { getServiceStatus } from "@/lib/services";
 import { getTimezone } from "@/lib/timezone";
-import { DemoData } from "./demo-data";
 import { SettingsForm } from "./settings-form";
 
 export const metadata = { title: "Settings" };
@@ -17,45 +16,27 @@ export default async function SettingsPage() {
 
   const checks = [
     {
-      name: "Database",
-      ok: services.database === "neon",
-      live: "Neon Postgres",
-      fallback: "Local (PGlite in .data/)",
-      howTo: (
-        <>
-          Accept Neon&apos;s terms in the Vercel dashboard, then run <code>vercel integration add neon</code> and{" "}
-          <code>vercel env pull</code>.
-        </>
-      ),
+      name: "Practice data",
+      ok: true,
+      live: services.database === "neon" ? "Neon Postgres" : "Saved on this computer",
+      detail: services.database === "neon" ? null : <>Sessions, journals, drills and progress live in <code>.data/</code> inside the project folder.</>,
     },
     {
       name: "Recordings",
       ok: true,
-      live: services.recordings === "blob" ? "Vercel Blob (private)" : "This project's recordings/ folder",
-      fallback: "",
-      howTo: null,
+      live: services.recordings === "blob" ? "Vercel Blob (private)" : "Saved on this computer",
+      detail: services.recordings === "blob" ? null : <>Every take is a file in the project&apos;s <code>recordings/</code> folder.</>,
     },
     {
       name: "AI journal",
       ok: services.ai === "gateway",
       live: "Vercel AI Gateway",
-      fallback: "Off — journals wait until enabled",
-      howTo: (
-        <>
-          Run <code>vercel env pull</code> (provides <code>VERCEL_OIDC_TOKEN</code> locally), or set <code>AI_GATEWAY_API_KEY</code>.
-        </>
-      ),
-    },
-    {
-      name: "Password",
-      ok: services.password === "on",
-      live: "On",
-      fallback: "Off — anyone with the URL can open the site",
-      howTo: (
-        <>
-          Run <code>vercel env add APP_PASSWORD</code>, then <code>vercel env pull</code> and restart.
-        </>
-      ),
+      detail:
+        services.ai === "gateway" ? (
+          <>If entries fail, add a card to AI Gateway in your Vercel dashboard and put a long-lived <code>AI_GATEWAY_API_KEY</code> in <code>.env.local</code>.</>
+        ) : (
+          <>Create an AI Gateway API key in your Vercel dashboard and add <code>AI_GATEWAY_API_KEY=…</code> to <code>.env.local</code>, then restart. Until then sessions still save and journals can be retried.</>
+        ),
     },
   ];
 
@@ -77,17 +58,17 @@ export default async function SettingsPage() {
         </Card>
 
         <Card className="h-fit">
-          <CardTitle>Setup status</CardTitle>
+          <CardTitle>Where your data lives</CardTitle>
           <ul className="divide-y divide-border">
             {checks.map((check) => (
               <li key={check.name} className="py-3 first:pt-0 last:pb-0">
                 <div className="flex items-center justify-between gap-3">
                   <span className="font-medium">{check.name}</span>
-                  <Pill tone={check.ok ? "good" : "warn"}>{check.ok ? check.live : check.fallback}</Pill>
+                  <Pill tone={check.ok ? "good" : "warn"}>{check.ok ? check.live : "Not set up"}</Pill>
                 </div>
-                {!check.ok && (
+                {check.detail && (
                   <p className="mt-1.5 text-sm text-ink-2 [&_code]:rounded [&_code]:bg-surface-2 [&_code]:px-1 [&_code]:py-0.5 [&_code]:font-mono [&_code]:text-xs">
-                    {check.howTo}
+                    {check.detail}
                   </p>
                 )}
               </li>
@@ -100,12 +81,13 @@ export default async function SettingsPage() {
         </Card>
       </div>
 
-      {process.env.NODE_ENV === "development" && (
-        <Card>
-          <CardTitle>Demo data</CardTitle>
-          <DemoData />
-        </Card>
-      )}
+      <Card>
+        <CardTitle>Backups</CardTitle>
+        <p className="text-sm text-ink-2 [&_code]:rounded [&_code]:bg-surface-2 [&_code]:px-1 [&_code]:py-0.5 [&_code]:font-mono [&_code]:text-xs">
+          Everything is on this computer only (both folders are left out of git). To back up, copy <code>.data/</code> and{" "}
+          <code>recordings/</code> together while the app is stopped — or let Time Machine cover the project folder.
+        </p>
+      </Card>
     </div>
   );
 }

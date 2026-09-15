@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
-    "db:generate": "drizzle-kit generate"
+    "db:generate": "drizzle-kit generate",
+    "app": "next build && next start --port 3000"
   },
   "dependencies": {
     "@electric-sql/pglite": "^0.5.8",
