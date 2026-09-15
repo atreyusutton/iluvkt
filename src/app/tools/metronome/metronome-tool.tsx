@@ -90,7 +90,7 @@ export function MetronomeTool() {
   return (
     <div className="grid gap-4 lg:grid-cols-[2fr_1fr]">
       <Card className="flex flex-col items-center gap-6 py-10 text-center">
-        <div className="flex gap-3">
+        <div className="flex flex-wrap justify-center gap-3">
           {Array.from({ length: beatsPerBar }, (_, beat) => (
             <span
               key={beat}
@@ -144,7 +144,7 @@ export function MetronomeTool() {
         <div>
           <span className="label">Beats per bar</span>
           <div className="flex gap-2">
-            {[2, 3, 4, 6].map((value) => (
+            {[2, 3, 4, 6, 8].map((value) => (
               <button
                 key={value}
                 onClick={() => setBeatsPerBar(value)}
