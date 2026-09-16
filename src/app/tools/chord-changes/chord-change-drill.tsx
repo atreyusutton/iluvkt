@@ -7,25 +7,15 @@ import { ChordDiagram } from "@/components/chord-diagram";
 import { Button, Card, cn } from "@/components/ui";
 import { CHORDS } from "@/content/chords";
 import { beep } from "@/lib/audio/metronome";
+import { type ChordPair, normalizePairKey, pairKey } from "@/lib/chord-pairs";
 
 type Result = { id: number; key: string; score: number; createdAt: string };
+type SongGroup = { id: number; title: string; pairs: ChordPair[] };
 type Phase = "idle" | "countdown" | "running" | "entering";
 
-const SUGGESTED: [string, string][] = [
-  ["C", "G"],
-  ["G", "Am"],
-  ["Am", "F"],
-  ["C", "F"],
-  ["D7", "G"],
-  ["G", "G7"],
-  ["C", "C7"],
-  ["F", "D7"],
-];
-
 const DRILL_SECONDS = 60;
-const pairKey = (a: string, b: string) => `${a}→${b}`;
 
-export function ChordChangeDrill({ results }: { results: Result[] }) {
+export function ChordChangeDrill({ songGroups, results }: { songGroups: SongGroup[]; results: Result[] }) {
   const router = useRouter();
   const [first, setFirst] = useState("C");
   const [second, setSecond] = useState("G");
@@ -38,10 +28,17 @@ export function ChordChangeDrill({ results }: { results: Result[] }) {
   const timerRef = useRef<number | null>(null);
 
   const key = pairKey(first, second);
-  const history = results.filter((result) => result.key === key);
+  const history = results.filter((result) => normalizePairKey(result.key) === key);
   const best = history.reduce<number | null>((max, result) => (max === null || result.score > max ? result.score : max), null);
   const bestByPair = new Map<string, number>();
-  for (const result of results) bestByPair.set(result.key, Math.max(bestByPair.get(result.key) ?? 0, result.score));
+  for (const result of results) {
+    const resultKey = normalizePairKey(result.key);
+    bestByPair.set(resultKey, Math.max(bestByPair.get(resultKey) ?? 0, result.score));
+  }
+  const drilledPairs = new Set(bestByPair.keys());
+  const selectedPair = songGroups
+    .flatMap((song) => song.pairs.map((pair) => ({ ...pair, song: song.title })))
+    .find((pair) => pair.key === key);
 
   const clearTimer = () => {
     if (timerRef.current !== null) window.clearInterval(timerRef.current);
@@ -122,29 +119,47 @@ export function ChordChangeDrill({ results }: { results: Result[] }) {
   return (
     <div className="grid gap-4 lg:grid-cols-[2fr_1fr]">
       <Card className="space-y-6">
-        <div className="flex flex-wrap gap-2">
-          {SUGGESTED.map(([a, b]) => {
-            const selected = a === first && b === second;
-            const pairBest = bestByPair.get(pairKey(a, b));
-            return (
-              <button
-                key={pairKey(a, b)}
-                disabled={busy}
-                onClick={() => {
-                  setFirst(a);
-                  setSecond(b);
-                }}
-                className={cn(
-                  "rounded-full px-3 py-1.5 text-sm font-medium disabled:opacity-50",
-                  selected ? "bg-ink text-bg" : "bg-surface-2 text-ink-2 hover:text-ink",
-                )}
-              >
-                {a} ↔ {b}
-                {pairBest !== undefined && <span className="ml-1.5 opacity-70">{pairBest}</span>}
-              </button>
-            );
-          })}
-        </div>
+        {songGroups.map((song) => {
+          const untried = song.pairs.filter((pair) => !drilledPairs.has(pair.key)).length;
+          return (
+            <div key={song.id} className="space-y-2">
+              <div className="flex flex-wrap items-baseline justify-between gap-2">
+                <span className="label">
+                  Every change in {song.title} · {song.pairs.length}
+                </span>
+                {untried > 0 && <span className="text-xs text-ink-3">{untried} not tried yet</span>}
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {song.pairs.map((pair) => {
+                  const selected = pair.first === first && pair.second === second;
+                  const pairBest = bestByPair.get(pair.key);
+                  return (
+                    <button
+                      key={pair.key}
+                      disabled={busy}
+                      title={`${pair.count}× in ${pair.sections.join(", ")}`}
+                      onClick={() => {
+                        setFirst(pair.first);
+                        setSecond(pair.second);
+                      }}
+                      className={cn(
+                        "rounded-full px-3 py-1.5 text-sm font-medium disabled:opacity-50",
+                        selected
+                          ? "bg-ink text-bg"
+                          : pairBest === undefined
+                            ? "bg-surface-2 text-ink-3 ring-1 ring-inset ring-border hover:text-ink"
+                            : "bg-surface-2 text-ink-2 hover:text-ink",
+                      )}
+                    >
+                      {pair.first} ↔ {pair.second}
+                      {pairBest !== undefined && <span className="ml-1.5 opacity-70">{pairBest}</span>}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })}
 
         <div className="grid grid-cols-2 gap-3">
           {[
@@ -227,6 +242,13 @@ export function ChordChangeDrill({ results }: { results: Result[] }) {
         <h2 className="font-display text-lg font-semibold">
           {first} ↔ {second}
         </h2>
+        {selectedPair ? (
+          <p className="mt-1 text-sm text-ink-3">
+            {selectedPair.count}× in {selectedPair.song} — {selectedPair.sections.join(", ")}
+          </p>
+        ) : (
+          <p className="mt-1 text-sm text-ink-3">Not a change any of your songs asks for — drill it anyway if you like.</p>
+        )}
         <div className="mt-4 grid grid-cols-2 gap-3">
           <div className="rounded-xl bg-surface-2 p-3">
             <div className="label">Best</div>
