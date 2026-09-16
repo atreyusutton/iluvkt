@@ -19,7 +19,7 @@ export function SessionPill({ floating = false }: { floating?: boolean }) {
       href="/practice"
       className={
         floating
-          ? "fixed bottom-20 right-4 z-40 flex items-center gap-2 rounded-full bg-ink px-4 py-2 text-sm font-medium text-bg shadow-lg md:hidden"
+          ? "fixed bottom-36 right-4 z-40 flex items-center gap-2 rounded-full bg-ink px-4 py-2 text-sm font-medium text-bg shadow-lg md:hidden"
           : "mx-1 flex items-center gap-2 rounded-xl bg-ink px-3 py-2 text-sm font-medium text-bg"
       }
     >

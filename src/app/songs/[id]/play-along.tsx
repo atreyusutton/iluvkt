@@ -77,6 +77,11 @@ export function PlayAlong({
     if (timeline.totalBeats === 0) return;
     setSaved(null);
     const metronome = (metronomeRef.current ??= new Metronome());
+    // The site-wide metronome widget can take the click over; keep the transport in sync.
+    metronome.onStopped = () => {
+      setPlaying(false);
+      setPosition(null);
+    };
     metronome.bpm = bpm;
     metronome.beatsPerBar = beatsPerBar;
     metronome.subdivisions = stepsPerBeat;

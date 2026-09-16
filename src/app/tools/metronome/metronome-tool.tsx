@@ -2,20 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Button, Card, cn } from "@/components/ui";
-import { Metronome } from "@/lib/audio/metronome";
-
-const MIN_BPM = 30;
-const MAX_BPM = 240;
-const clampBpm = (value: number) => Math.min(MAX_BPM, Math.max(MIN_BPM, Math.round(value)));
-
-function tempoName(bpm: number) {
-  if (bpm < 60) return "Largo";
-  if (bpm < 76) return "Adagio";
-  if (bpm < 108) return "Andante";
-  if (bpm < 120) return "Moderato";
-  if (bpm < 168) return "Allegro";
-  return "Presto";
-}
+import { MAX_BPM, MIN_BPM, Metronome, clampBpm, tapTempo, tempoName } from "@/lib/audio/metronome";
 
 export function MetronomeTool() {
   const metronomeRef = useRef<Metronome | null>(null);
@@ -31,6 +18,10 @@ export function MetronomeTool() {
     if (!metronomeRef.current) {
       const metronome = new Metronome();
       metronome.onTick = (event) => setCurrentBeat(event.beat);
+      metronome.onStopped = () => {
+        setRunning(false);
+        setCurrentBeat(null);
+      };
       metronomeRef.current = metronome;
     }
     return metronomeRef.current;
@@ -78,13 +69,9 @@ export function MetronomeTool() {
   }, [toggle]);
 
   const tap = () => {
-    const now = performance.now();
-    const taps = [...tapsRef.current.filter((time) => now - time < 2500), now].slice(-6);
+    const { taps, bpm: tapped } = tapTempo(tapsRef.current);
     tapsRef.current = taps;
-    if (taps.length < 2) return;
-    const intervals = taps.slice(1).map((time, index) => time - taps[index]);
-    const average = intervals.reduce((sum, value) => sum + value, 0) / intervals.length;
-    setBpm(clampBpm(60000 / average));
+    if (tapped !== null) setBpm(tapped);
   };
 
   return (

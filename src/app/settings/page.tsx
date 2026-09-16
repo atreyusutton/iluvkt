@@ -4,6 +4,8 @@ import { settings } from "@/db/schema";
 import { Card, CardTitle, PageHeader, Pill } from "@/components/ui";
 import { getServiceStatus } from "@/lib/services";
 import { getTimezone } from "@/lib/timezone";
+import { previewDayMerge } from "@/app/actions/misc";
+import { MergeDays } from "./merge-days";
 import { SettingsForm } from "./settings-form";
 
 export const metadata = { title: "Settings" };
@@ -13,6 +15,7 @@ export default async function SettingsPage() {
   const [row] = await db.select().from(settings).where(eq(settings.id, 1));
   const services = getServiceStatus();
   const timeZone = await getTimezone();
+  const mergeCandidates = await previewDayMerge();
 
   const checks = [
     {
@@ -80,6 +83,8 @@ export default async function SettingsPage() {
           </ul>
         </Card>
       </div>
+
+      <MergeDays candidates={mergeCandidates} />
 
       <Card>
         <CardTitle>Backups</CardTitle>

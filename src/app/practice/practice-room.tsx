@@ -6,6 +6,7 @@ import { useEffect, useRef, useState, useTransition } from "react";
 import { discardSession, finishSession, startSession } from "@/app/actions/session";
 import { FOCUS_AREAS } from "@/content/focus-areas";
 import { Recorder } from "@/components/recorder";
+import { useRecording } from "@/components/recording-provider";
 import { Button, ButtonLink, Card, CardTitle, cn, PageHeader, ProgressBar } from "@/components/ui";
 import {
   EMPTY_DRAFT,
@@ -45,8 +46,10 @@ export function PracticeRoom({
 }) {
   const router = useRouter();
   const state = usePracticeState();
+  const recording = useRecording();
   const now = useNow(250, Boolean(state?.runningSince));
   const [pending, startTransition] = useTransition();
+  const [dontRecord, setDontRecord] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [finishing, setFinishing] = useState(false);
   const [dismissedId, setDismissedId] = useState<number | null>(null);
@@ -82,12 +85,16 @@ export function PracticeRoom({
     startTransition(async () => {
       try {
         const session = await startSession();
+        const songId = songs[0]?.id ?? null;
+        // The recorder tags takes with whatever session is in local state, so write it first.
         setPracticeState({
           sessionId: session.id,
           accumulatedMs: 0,
           runningSince: Date.now(),
-          draft: { ...EMPTY_DRAFT, songId: songs[0]?.id ?? null },
+          draft: { ...EMPTY_DRAFT, songId },
         });
+        // A blocked camera surfaces as recording.error below; the session still runs.
+        if (!dontRecord) await recording.start("video", { songId });
       } catch (err) {
         setError(err instanceof Error ? err.message : String(err));
       }
@@ -116,6 +123,8 @@ export function PracticeRoom({
   const finish = () => {
     if (!state) return;
     setError(null);
+    // Stop before the redirect: the bar lives in the root layout, so the take survives it.
+    if (recording.phase === "recording" || recording.phase === "paused") recording.stop();
     const durationSeconds = elapsedMs(state, Date.now()) / 1000;
     startTransition(async () => {
       try {
@@ -163,14 +172,26 @@ export function PracticeRoom({
         />
         <Card className="flex flex-col items-center gap-6 py-12 text-center">
           <div className="font-display text-7xl font-semibold tabular-nums text-ink-3">0:00</div>
-          <Button size="lg" onClick={begin} disabled={pending} className="min-w-56">
-            {pending ? "Starting…" : "Start session"}
-          </Button>
+          <div className="flex flex-col items-center gap-3">
+            <Button size="lg" onClick={begin} disabled={pending} className="min-w-56">
+              {pending ? "Starting…" : dontRecord ? "Start session" : "Start session & record"}
+            </Button>
+            <label className="flex items-center gap-2 text-sm text-ink-3">
+              <input
+                type="checkbox"
+                checked={dontRecord}
+                onChange={(event) => setDontRecord(event.target.checked)}
+                className="h-4 w-4 accent-[var(--accent)]"
+              />
+              Don&apos;t record this practice session
+            </label>
+          </div>
           <div className="w-full max-w-sm">
             <ProgressBar value={todayMinutes} max={goalMinutes} />
             <p className="mt-2 text-sm text-ink-3">{Math.floor(todayMinutes)} / {goalMinutes} min today</p>
           </div>
           {error && <p className="text-sm text-bad">{error}</p>}
+          {recording.error && <p className="text-sm text-bad">{recording.error}</p>}
         </Card>
         <SessionPlan goalMinutes={goalMinutes} />
       </div>
