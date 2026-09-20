@@ -123,7 +123,8 @@ export function buildRoutine({ today, changes, song }: RoutineInput): RoutineSte
   steps.push({
     area: "Chord changes",
     label: "One-minute changes",
-    share: 0.2,
+    // Seven pairs at a minute each, plus the time to read the next one off the screen.
+    share: 0.28,
     detail: changes.length > 0 ? describeChanges(changes) : "One-minute changes on today's pairs",
     href: "/tools/chord-changes",
   });

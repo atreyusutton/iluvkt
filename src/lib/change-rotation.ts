@@ -6,7 +6,14 @@ import { dayKey, daysBetween } from "@/lib/time";
  * fifteen minutes of one-minute changes — half a session. So the whole list stays
  * tracked and only a handful come up each day, picked by what's weakest and stalest.
  */
-export const CHANGES_PER_DAY = 5;
+export const CHANGES_PER_DAY = 7;
+
+/**
+ * Of the day's set, this many slots go to your lowest-scoring pairs whatever the rotation
+ * thinks. Staleness can otherwise push a weak pair down the list for days at a time, and a
+ * change you're slow at is the one holding the song back.
+ */
+export const SLOWEST_PER_DAY = 2;
 
 /** Once a pair is fast, it drops out of the rotation until it's gone this stale. */
 export const REST_DAYS_WHEN_STRONG = 14;
@@ -148,11 +155,37 @@ export function rankPairs(
 }
 
 /**
- * The day's set. `rankPairs` already sorts resting pairs last, so taking the top few
- * picks what's due and falls back to the stalest fast pairs when nothing else is.
+ * The day's set: your two slowest pairs, then down the rotation to fill the rest.
+ *
+ * `rankPairs` already sorts resting pairs last, so walking it picks what's due and falls
+ * back to the stalest fast pairs when nothing else is. A pair that's both slowest and next
+ * up in the rotation is only drilled once — the rotation moves on to the one after it.
  */
-export function todaysChanges(ranked: PairProgress[], size = CHANGES_PER_DAY): PairProgress[] {
-  return ranked.slice(0, size);
+export function todaysChanges(
+  ranked: PairProgress[],
+  size = CHANGES_PER_DAY,
+  slowest = SLOWEST_PER_DAY,
+): PairProgress[] {
+  const picks: PairProgress[] = [];
+  const taken = new Set<string>();
+
+  const scored = ranked
+    .filter((pair): pair is PairProgress & { best: number } => pair.best !== null)
+    .sort((a, b) => a.best - b.best || a.key.localeCompare(b.key));
+
+  for (const pair of scored.slice(0, Math.min(slowest, size))) {
+    picks.push(pair);
+    taken.add(pair.key);
+  }
+
+  for (const pair of ranked) {
+    if (picks.length >= size) break;
+    if (taken.has(pair.key)) continue;
+    picks.push(pair);
+    taken.add(pair.key);
+  }
+
+  return picks;
 }
 
 /** Why this pair came up today, for the line under its name. */

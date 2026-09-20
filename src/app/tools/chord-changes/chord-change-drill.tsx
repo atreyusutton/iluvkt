@@ -7,7 +7,7 @@ import { ChordDiagram } from "@/components/chord-diagram";
 import { Button, Card, CardTitle, cn, Pill } from "@/components/ui";
 import { CHORDS } from "@/content/chords";
 import { beep } from "@/lib/audio/metronome";
-import { type PairProgress, pickReason, type Tier, TIER_LABELS } from "@/lib/change-rotation";
+import { type PairProgress, pickReason, SLOWEST_PER_DAY, type Tier, TIER_LABELS } from "@/lib/change-rotation";
 import { normalizePairKey, pairKey } from "@/lib/chord-pairs";
 
 type Result = { id: number; key: string; score: number; createdAt: string };
@@ -175,8 +175,8 @@ export function ChordChangeDrill({
           </CardTitle>
           <p className="-mt-2 mb-4 text-sm text-ink-3">
             {songTitles.join(" and ")} asks for {ranked.length} different changes — too many to drill in one sitting. These{" "}
-            {todays.length} are today&apos;s, picked from what you&apos;ve never tried, scored lowest, or haven&apos;t
-            touched in longest. The rest are below.
+            {todays.length} are today&apos;s: the {SLOWEST_PER_DAY} you score lowest on, then whatever you&apos;ve
+            never tried or haven&apos;t touched in longest. The rest are below.
           </p>
 
           <ul className="divide-y divide-border">

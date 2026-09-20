@@ -9,7 +9,7 @@
 - Songs: chord sheet (ChordPro-style, paste your own lyrics), tempo-driven play-along with click + Travis tab, sections w/ status + best BPM, tutorial videos (watch-only, bookmarks, speed), recordings, details
 - Lessons: 5 modules / 15 lessons with steps, chords, tools, video slot, completion
 - Tools: tuner, metronome, chord library, one-minute chord changes, fretboard trainer
-- Chord changes rotate: all of the song's changes stay tracked, but only 5 come up each day — untried first, then weakest and stalest; fast pairs rest for two weeks. Today's set shows in the tool and in the session plan.
+- Chord changes rotate: all of the song's changes stay tracked, but only 7 come up each day — your 2 slowest, then untried, weakest and stalest; fast pairs rest for two weeks. Today's set shows in the tool and in the session plan.
 - Journal (list, detail, manual log, retry), Recordings (timeline, then-vs-now, star/rename/delete), Milestones, Settings (setup status)
 
 ## Needs you
