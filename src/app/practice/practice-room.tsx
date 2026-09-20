@@ -8,6 +8,7 @@ import { FOCUS_AREAS } from "@/content/focus-areas";
 import { Recorder } from "@/components/recorder";
 import { useRecording } from "@/components/recording-provider";
 import { Button, ButtonLink, Card, CardTitle, cn, PageHeader, ProgressBar } from "@/components/ui";
+import type { RoutineStep } from "@/lib/daily-routine";
 import {
   EMPTY_DRAFT,
   elapsedMs,
@@ -22,30 +23,19 @@ import { useNow } from "@/lib/use-now";
 const STALE_SESSION_MS = 3 * 60 * 60 * 1000;
 
 type SongOption = { id: number; title: string; sections: { id: number; name: string }[] };
-type TodaysChange = { key: string; first: string; second: string; doneToday: boolean };
-
-/** A suggested shape for a 30-minute session, scaled to the daily goal. */
-const PLAN = [
-  { area: "Tuning", share: 0.05, detail: "Tune up (and retune after the capo)", href: "/tools/tuner" },
-  { area: "Warm-up", share: 0.1, detail: "Finger stretches, slow chromatic runs", href: null },
-  { area: "Chord changes", share: 0.2, detail: "One-minute changes on today's pairs", href: "/tools/chord-changes" },
-  { area: "Picking pattern", share: 0.2, detail: "Travis pattern on one chord, then through changes", href: "/tools/metronome" },
-  { area: "Song sections", share: 0.35, detail: "Play-along on the section marked 'learning'", href: "/songs" },
-  { area: "Full run-through", share: 0.1, detail: "Play it top to bottom without stopping — record it", href: null },
-];
 
 export function PracticeRoom({
   active,
   todayMinutes,
   goalMinutes,
   songs,
-  todaysChanges,
+  routine,
 }: {
   active: { id: number; startedAt: string } | null;
   todayMinutes: number;
   goalMinutes: number;
   songs: SongOption[];
-  todaysChanges: TodaysChange[];
+  routine: RoutineStep[];
 }) {
   const router = useRouter();
   const state = usePracticeState();
@@ -196,7 +186,7 @@ export function PracticeRoom({
           {error && <p className="text-sm text-bad">{error}</p>}
           {recording.error && <p className="text-sm text-bad">{recording.error}</p>}
         </Card>
-        <SessionPlan goalMinutes={goalMinutes} todaysChanges={todaysChanges} />
+        <SessionPlan goalMinutes={goalMinutes} routine={routine} />
       </div>
     );
   }
@@ -372,19 +362,19 @@ export function PracticeRoom({
         </div>
       </div>
 
-      <SessionPlan goalMinutes={goalMinutes} todaysChanges={todaysChanges} checked={draft.focusAreas} onToggle={toggleArea} />
+      <SessionPlan goalMinutes={goalMinutes} routine={routine} checked={draft.focusAreas} onToggle={toggleArea} />
     </div>
   );
 }
 
 function SessionPlan({
   goalMinutes,
-  todaysChanges,
+  routine,
   checked,
   onToggle,
 }: {
   goalMinutes: number;
-  todaysChanges: TodaysChange[];
+  routine: RoutineStep[];
   checked?: string[];
   onToggle?: (area: string) => void;
 }) {
@@ -392,10 +382,8 @@ function SessionPlan({
     <Card>
       <CardTitle>A {goalMinutes}-minute session plan</CardTitle>
       <ol className="divide-y divide-border">
-        {PLAN.map((step) => {
+        {routine.map((step) => {
           const done = checked?.includes(step.area);
-          // The chord-change row names the day's actual rotation instead of generic advice.
-          const changes = step.area === "Chord changes" && todaysChanges.length > 0 ? todaysChanges : null;
           return (
             <li key={step.area} className="flex items-center gap-4 py-3">
               {onToggle ? (
@@ -414,14 +402,8 @@ function SessionPlan({
                 {Math.max(1, Math.round(goalMinutes * step.share))} min
               </div>
               <div className="min-w-0 flex-1">
-                <div className={cn("font-medium", done && "text-ink-3 line-through")}>{step.area}</div>
-                <div className="text-sm text-ink-3">
-                  {changes
-                    ? `${changes.map((change) => `${change.first} ↔ ${change.second}`).join(" · ")} — ${
-                        changes.filter((change) => change.doneToday).length
-                      } of ${changes.length} done`
-                    : step.detail}
-                </div>
+                <div className={cn("font-medium", done && "text-ink-3 line-through")}>{step.label}</div>
+                <div className="text-sm text-ink-3">{step.detail}</div>
               </div>
               {step.href && (
                 <Link href={step.href} className="shrink-0 text-sm text-accent hover:underline">

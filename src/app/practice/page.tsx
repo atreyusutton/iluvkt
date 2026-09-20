@@ -3,6 +3,7 @@ import { getDb } from "@/db";
 import { drillResults, songSections, songs } from "@/db/schema";
 import { mergePairs, rankPairs, todaysChanges } from "@/lib/change-rotation";
 import { chordPairsFromSections, playablePairs } from "@/lib/chord-pairs";
+import { buildRoutine } from "@/lib/daily-routine";
 import { getActiveSession, getPracticeStats } from "@/lib/stats";
 import { dayKey } from "@/lib/time";
 import { getTimezone } from "@/lib/timezone";
@@ -15,9 +16,25 @@ export default async function PracticePage() {
   const [active, stats, songRows, sectionRows, drills] = await Promise.all([
     getActiveSession(),
     getPracticeStats(timeZone),
-    db.select({ id: songs.id, title: songs.title }).from(songs).orderBy(asc(songs.id)),
     db
-      .select({ id: songSections.id, songId: songSections.songId, name: songSections.name, bars: songSections.bars })
+      .select({
+        id: songs.id,
+        title: songs.title,
+        capo: songs.capo,
+        targetBpm: songs.targetBpm,
+        strummingPattern: songs.strummingPattern,
+      })
+      .from(songs)
+      .orderBy(asc(songs.id)),
+    db
+      .select({
+        id: songSections.id,
+        songId: songSections.songId,
+        name: songSections.name,
+        bars: songSections.bars,
+        status: songSections.status,
+        bestBpm: songSections.bestBpm,
+      })
       .from(songSections)
       .orderBy(asc(songSections.position)),
     db.select().from(drillResults).where(eq(drillResults.type, "chord-change")).orderBy(desc(drillResults.createdAt)),
@@ -30,7 +47,31 @@ export default async function PracticePage() {
     }))
     .filter((group) => group.pairs.length > 0);
 
-  const todays = todaysChanges(rankPairs(mergePairs(groups), drills, dayKey(new Date(), timeZone), timeZone));
+  const today = dayKey(new Date(), timeZone);
+  const todays = todaysChanges(rankPairs(mergePairs(groups), drills, today, timeZone));
+
+  // The routine is built around one song: the first that still has work left in it.
+  const sectionsOf = (songId: number) => sectionRows.filter((section) => section.songId === songId);
+  const routineSong =
+    songRows.find((song) => sectionsOf(song.id).some((section) => section.status !== "nailed")) ?? songRows[0] ?? null;
+
+  const routine = buildRoutine({
+    today,
+    changes: todays.map((pair) => ({ first: pair.first, second: pair.second, doneToday: pair.doneToday })),
+    song: routineSong
+      ? {
+          title: routineSong.title,
+          capo: routineSong.capo,
+          targetBpm: routineSong.targetBpm,
+          strummingPattern: routineSong.strummingPattern,
+          sections: sectionsOf(routineSong.id).map((section) => ({
+            name: section.name,
+            status: section.status,
+            bestBpm: section.bestBpm,
+          })),
+        }
+      : null,
+  });
 
   return (
     <PracticeRoom
@@ -38,17 +79,11 @@ export default async function PracticePage() {
       todayMinutes={stats.todayMinutes}
       goalMinutes={stats.goalMinutes}
       songs={songRows.map((song) => ({
-        ...song,
-        sections: sectionRows
-          .filter((section) => section.songId === song.id)
-          .map((section) => ({ id: section.id, name: section.name })),
+        id: song.id,
+        title: song.title,
+        sections: sectionsOf(song.id).map((section) => ({ id: section.id, name: section.name })),
       }))}
-      todaysChanges={todays.map((pair) => ({
-        key: pair.key,
-        first: pair.first,
-        second: pair.second,
-        doneToday: pair.doneToday,
-      }))}
+      routine={routine}
     />
   );
 }

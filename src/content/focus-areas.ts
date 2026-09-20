@@ -10,3 +10,5 @@ export const FOCUS_AREAS = [
   "Fretboard / theory",
   "Recording",
 ] as const;
+
+export type FocusArea = (typeof FOCUS_AREAS)[number];
